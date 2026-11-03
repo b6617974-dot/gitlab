@@ -44,7 +44,7 @@ def analyze_dc(voltage_v: float, resistance_ohm: float) -> Dict[str, Any]:
             break
     if not recommended_wattage:
         recommended_wattage = (
-            f"> 10 W (กำลังสูญเสียสูง แนะนำใช้ Power Resistor หรือติด Heatsink)"
+            "> 10 W (กำลังสูญเสียสูง แนะนำใช้ Power Resistor หรือติด Heatsink)"
         )
 
     return {
@@ -77,18 +77,8 @@ def print_circuit_report(data: Dict[str, Any]) -> None:
 
 
 if __name__ == "__main__":
-    # ตัวอย่างที่ 1: การคำนวณและแสดงผลปกติ
     try:
         result = analyze_dc(voltage_v=12.0, resistance_ohm=6.0)
         print_circuit_report(result)
-    except (ValueError, TypeError, ZeroDivisionError) as err:
-        print(f"[Error]: {err}")
-
-    print()
-
-    # ตัวอย่างที่ 2: วงจรแรงดันต่ำกระแสต่ำ (mA / mW)
-    try:
-        sensor_resistor = analyze_dc(voltage_v=3.3, resistance_ohm=1000.0)
-        print_circuit_report(sensor_resistor)
     except (ValueError, TypeError, ZeroDivisionError) as err:
         print(f"[Error]: {err}")
