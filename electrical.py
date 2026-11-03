@@ -2,38 +2,22 @@ from typing import Any, Dict
 
 
 def analyze_dc(voltage_v: float, resistance_ohm: float) -> Dict[str, Any]:
-    """คำนวณและวิเคราะห์พารามิเตอร์ทางไฟฟ้ากระแสตรง (DC) สำหรับวงจรตัวต้านทาน
-
-    Parameters:
-        voltage_v (float): แรงดันตกคร่อมตัวต้านทาน (โวลต์, V)
-        resistance_ohm (float): ค่าความต้านทาน (โอห์ม, Ω)
-
-    Returns:
-        dict: ผลการคำนวณกระแส, กำลังไฟฟ้า, พิกัดตัวต้านทานที่แนะนำ
-    """
-    # ตรวจสอบชนิดข้อมูล
+    """คำนวณและวิเคราะห์พารามิเตอร์ทางไฟฟ้ากระแสตรง (DC) สำหรับวงจรตัวต้านทาน"""
+    # 1. ตรวจสอบชนิดข้อมูล
     if not isinstance(voltage_v, (int, float)) or not isinstance(
         resistance_ohm, (int, float)
     ):
         raise TypeError("แรงดันและความต้านทานต้องเป็นข้อมูลชนิดตัวเลขเท่านั้น")
 
-    # ตรวจสอบค่าทางกายภาพของวงจร
-    if resistance_ohm == 0:
-        raise ZeroDivisionError(
-            "เกิดสภาวะลัดวงจร (Short Circuit): ค่าความต้านทานเป็น 0 Ω กระแสไฟฟ้าพุ่งสูงอนันต์"
-        )
-    if resistance_ohm < 0:
-        raise ValueError(
-            "ค่าความต้านทานของอุปกรณ์ Passive ต้องมีค่ามากกว่า 0 Ω"
-        )
+    # 2. ตรวจสอบค่าความต้านทาน (ต้องเป็นบวกตามเกณฑ์ของแล็บ)
+    if resistance_ohm <= 0:
+        raise ValueError("Resistance must be positive")
 
-    # 1. คำนวณกระแสไฟฟ้าตามกฎของโอห์ม: I = V / R
+    # 3. คำนวณค่ากระแสและกำลังไฟฟ้า
     current_a = voltage_v / resistance_ohm
-
-    # 2. คำนวณกำลังไฟฟ้า: P = V * I (หรือ V^2 / R)
     power_w = (voltage_v**2) / resistance_ohm
 
-    # 3. กำหนดพิกัดตัวต้านทานมาตรฐานพร้อมค่าเผื่อความปลอดภัย (Derating factor 50% หรือ 2 เท่าของโหลด)
+    # 4. แนะนำพิกัดตัวต้านทานมาตรฐาน (Derating factor 50%)
     standard_ratings = [0.125, 0.25, 0.5, 1.0, 2.0, 5.0, 10.0]
     safe_power_requirement = power_w * 2.0
 
@@ -48,11 +32,11 @@ def analyze_dc(voltage_v: float, resistance_ohm: float) -> Dict[str, Any]:
         )
 
     return {
+        "current_a": current_a,
+        "power_w": power_w,
         "voltage_v": round(float(voltage_v), 4),
         "resistance_ohm": round(float(resistance_ohm), 4),
-        "current_a": round(current_a, 4),
         "current_ma": round(current_a * 1000, 2),
-        "power_w": round(power_w, 4),
         "power_mw": round(power_w * 1000, 2),
         "recommended_rating": recommended_wattage,
     }
@@ -80,5 +64,5 @@ if __name__ == "__main__":
     try:
         result = analyze_dc(voltage_v=12.0, resistance_ohm=6.0)
         print_circuit_report(result)
-    except (ValueError, TypeError, ZeroDivisionError) as err:
+    except (ValueError, TypeError) as err:
         print(f"[Error]: {err}")
